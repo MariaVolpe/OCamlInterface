@@ -2,3 +2,5 @@
 *.cmx
 *.o
 *.DS_Store
+interface
+calc_test

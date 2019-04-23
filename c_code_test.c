@@ -1,6 +1,7 @@
 // test file to run c functions compiled via gcc
 #include <stdio.h>
 #include <math.h>
+#include "cJSON.h"
 
 int add(int a, int b) {
     return a + b;

@@ -1,6 +1,6 @@
 all: interface
 
-interface: interface.ml calculator.c
+interface: interface.ml c_code.c
 	ocamlfind ocamlopt -package ctypes,ctypes.foreign -linkpkg -o $@ $^
 
 docs: interface.ml

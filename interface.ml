@@ -1,9 +1,27 @@
 open Ctypes
-open PosixTypes
 open Foreign
 
 let add = foreign "add" (int @-> int @-> returning int) ;;
 let ldexp = foreign "ldexp" (double @-> int @-> returning double) ;;
+
+(* String.h functions *)
+(* | void *memchr(const void *str, int c, size_t n) | *)
+let memchr = foreign "memchr" (ptr void @-> int @-> size_t @-> returning (ptr void)) ;;
+
+(* | char *strcat(char *dest, const char *src) | *)
+let strcat = foreign "strcat" (string @-> string @-> returning string) ;;
+
+(* | char *strchr(const char *str, int c)  | *)
+let strchr = foreign "strchr" (string @-> int @-> returning string) ;;
+
+(* | int strcmp(const char *str1, const char *str2) | *)
+let strcmp = foreign "strcmp" (string @-> string @-> returning int) ;;
+
+(* | int strncmp(const char *str1, const char *str2, size_t n) | *)
+let strncmp = foreign "strncmp" (string @-> string @-> size_t @-> returning int) ;;
+
+(* | char *strcpy(char *dest, const char *src) | *)
+let strcpy = foreign "strcpy" (string @-> string @-> returning string) ;;
 
 let () =
     Printf.printf "%i \n" (add 1 1);

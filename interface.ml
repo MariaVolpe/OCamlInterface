@@ -37,6 +37,15 @@ let strncmp = foreign "strncmp" (string @-> string @-> size_t @-> returning int)
 (* | char *strcpy(char *dest, const char *src) | *)
 let strcpy = foreign "strcpy" (string @-> string @-> returning string) ;;
 
+
+(* ----- utils ----- *)
+
+(* shorthand to allocate pointers for a given type *)
+let to_str_ptr str = allocate string str;;
+let to_int_ptr i = allocate int i;;
+let to_double_ptr dbl = allocate double dbl;;
+
+
 let () =
     Printf.printf "%i \n" (add 1 1);
     Printf.printf "%i \n" (add 5 3);

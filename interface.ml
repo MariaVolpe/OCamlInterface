@@ -1,8 +1,22 @@
 open Ctypes
 open Foreign
 
+(* C function written manually *)
 let add = foreign "add" (int @-> int @-> returning int) ;;
+
+(* Math.h functions *)
+(* double ldexp(double x, int exponent) *)
 let ldexp = foreign "ldexp" (double @-> int @-> returning double) ;;
+
+(* double exp(double x) *)
+let exp = foreign "exp" (double @-> returning double) ;;
+
+(* double sqrt(double x) *)
+let sqrt = foreign "sqrt" (double @-> returning double) ;;
+
+(* double modf(double x, double *integer) *)
+let modf = foreign "modf" (double @-> ptr double @-> returning double) ;;
+
 
 (* String.h functions *)
 (* | void *memchr(const void *str, int c, size_t n) | *)

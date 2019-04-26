@@ -1,8 +1,9 @@
 open Ctypes
 open Foreign
 
-(* C function written manually *)
+(* C functions written manually *)
 let add = foreign "add" (int @-> int @-> returning int) ;;
+let add_with_ptrs = foreign "add_with_ptrs" (ptr int @-> ptr int @-> returning int) ;;
 
 (* Math.h functions *)
 (* double ldexp(double x, int exponent) *)
@@ -48,5 +49,5 @@ let to_double_ptr dbl = allocate double dbl;;
 
 let () =
     Printf.printf "%i \n" (add 1 1);
-    Printf.printf "%i \n" (add 5 3);
+    Printf.printf "%i \n" (add_with_ptrs (to_int_ptr 5) (to_int_ptr 3));
     Printf.printf "%f" (ldexp 11.0 2)

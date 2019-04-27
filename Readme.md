@@ -1,11 +1,6 @@
 Tentative build instructions (to be fleshed out later):
 
-To test c code, run
-```
-$ gcc calculator_test.c -o calc_test
-```
-
-To run actual OCaml, run
+To compile and run:
 ```
 $ make
 $ ./interface

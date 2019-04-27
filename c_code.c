@@ -7,6 +7,7 @@ int add(int a, int b) {
     return a + b;
 }
 
+// FUNCTION LIFTED FROM CJSON LIBRARY TESTS
 char *read_file(const char *filename)
 {
     FILE *file = NULL;

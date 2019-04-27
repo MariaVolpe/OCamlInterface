@@ -1,0 +1,10 @@
+{ 
+    "hello": {
+        "world": "test",
+        "integer": 10,
+        "new_child": {
+            "str_ex": "sss"
+        }
+    },
+    "second": "just a string"
+}

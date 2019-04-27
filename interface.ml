@@ -4,6 +4,15 @@ open Foreign
 
 let read_file = foreign "read_file" (string @-> returning string) ;;
 
+(* ocaml variant equivalent to cJSON c struct *)
+type name = string
+type value = Int of int
+            | String of string
+            | Bool of bool
+            | Child of json
+and node = name * value
+and json = node list
+
 (* cJSON *)
 
 (* TYPE DECLARATIONS *)
@@ -25,6 +34,15 @@ let name = field cJSON "string" string
 
 (* UTILS GO HERE -- WRAPPER FUNCTIONS TO ACTUALLY BE ABLE TO PARSE OUT RESULTING TYPES *)
 
+let cJSONtoJSON cJSON_blurb =
+    (* nested function *)
+    (* declare a new json object *)
+        let rec convert current =
+            (* if current = nill return  *)
+            (* then pull out name *)
+            (* then pull out value -- using match *)
+            then call with next
+
 (* shorthand to allocate pointers for a given type *)
 let to_str_ptr str = allocate string str;;
 let to_int_ptr i = allocate int i;;
@@ -38,6 +56,7 @@ let cJSON_Parse = foreign "cJSON_Parse" (string @-> returning (ptr cJSON)) ;;
 (* CJSON_PUBLIC(cJSON_bool) cJSON_IsTrue(const cJSON * const item); *)
 let cJSON_IsTrue = foreign "cJSON_IsTrue" (ptr cJSON @-> returning cJSON_bool) ;;
 
+(* small, temporary run test *)
 let () =
     Printf.printf "%s \n" (read_file "test.json")
     let str = read_file "test.json"

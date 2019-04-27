@@ -1,53 +1,39 @@
 open Ctypes
+open PosixTypes
 open Foreign
 
-(* C functions written manually *)
-let add = foreign "add" (int @-> int @-> returning int) ;;
-let add_with_ptrs = foreign "add_with_ptrs" (ptr int @-> ptr int @-> returning int) ;;
+(* TYPE DECLARATIONS *)
 
-(* Math.h functions *)
-(* double ldexp(double x, int exponent) *)
-let ldexp = foreign "ldexp" (double @-> int @-> returning double) ;;
+(* typedef int cJSON_bool; *)
+let cJSON_bool = int
 
-(* double exp(double x) *)
-let exp = foreign "exp" (double @-> returning double) ;;
+(* typedef .... cJSON struct *)
+type cJSON
+let cJSON : cJSON structure typ = structure "cJSON"
+let prev = field cJSON "prev" (ptr cJSON)
+let next = field cJSON "next" (ptr cJSON)
+let child = field cJSON "child" (ptr cJSON)
+let json_type = field cJSON "type" int
+let valuestring = field cJSON "valuestring" string
+let valueint = field cJSON "valueint" int
+let valuedouble = field cJSON "valuedouble" double
+let name = field cJSON "string" string
 
-(* double sqrt(double x) *)
-let sqrt = foreign "sqrt" (double @-> returning double) ;;
-
-(* double modf(double x, double *integer) *)
-let modf = foreign "modf" (double @-> ptr double @-> returning double) ;;
-
-
-(* String.h functions *)
-(* | void *memchr(const void *str, int c, size_t n) | *)
-let memchr = foreign "memchr" (ptr void @-> int @-> size_t @-> returning (ptr void)) ;;
-
-(* | char *strcat(char *dest, const char *src) | *)
-let strcat = foreign "strcat" (string @-> string @-> returning string) ;;
-
-(* | char *strchr(const char *str, int c)  | *)
-let strchr = foreign "strchr" (string @-> int @-> returning string) ;;
-
-(* | int strcmp(const char *str1, const char *str2) | *)
-let strcmp = foreign "strcmp" (string @-> string @-> returning int) ;;
-
-(* | int strncmp(const char *str1, const char *str2, size_t n) | *)
-let strncmp = foreign "strncmp" (string @-> string @-> size_t @-> returning int) ;;
-
-(* | char *strcpy(char *dest, const char *src) | *)
-let strcpy = foreign "strcpy" (string @-> string @-> returning string) ;;
-
-
-(* ----- utils ----- *)
+(* UTILS GO HERE -- WRAPPER FUNCTIONS TO ACTUALLY BE ABLE TO PARSE OUT RESULTING TYPES *)
 
 (* shorthand to allocate pointers for a given type *)
 let to_str_ptr str = allocate string str;;
 let to_int_ptr i = allocate int i;;
 let to_double_ptr dbl = allocate double dbl;;
 
+(* JSON FUNCTIONS *)
 
-let () =
-    Printf.printf "%i \n" (add 1 1);
-    Printf.printf "%i \n" (add_with_ptrs (to_int_ptr 5) (to_int_ptr 3));
-    Printf.printf "%f" (ldexp 11.0 2)
+(* | CJSON_PUBLIC(cJSON * ) cJSON_CreateTrue(void); | *)
+let cJSON_CreateTrue = foreign "cJSON_CreateTrue" (void @-> returning cJSON_bool) ;;
+let cJSON_CreateFalse = foreign "cJSON_CreateFalse" (void @-> returning cJSON_bool) ;;
+
+(* CJSON_PUBLIC(cJSON * ) cJSON_CreateString(const char *string); *)
+let cJSON_CreateString = foreign "cJSON_CreateString" (string @-> returning (ptr cJSON)) ;;
+
+(* CJSON_PUBLIC(cJSON_bool) cJSON_IsTrue(const cJSON * const item); *)
+let cJSON_IsTrue = foreign "cJSON_IsTrue" (ptr cJSON @-> returning cJSON_bool) ;;

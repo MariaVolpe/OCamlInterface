@@ -2,8 +2,14 @@ open Ctypes
 open PosixTypes
 open Foreign
 
+let read_file = foreign "read_file" (string @-> returning string) ;;
+
 (* TYPE DECLARATIONS *)
 
+(* cJSON *)
+
+(* CJSON_PUBLIC(cJSON * ) cJSON_Parse(const char *value); *)
+let cJSON_Parse = foreign "cJSON_Parse" (string @-> returning (ptr cJSON)) ;;
 (* typedef int cJSON_bool; *)
 let cJSON_bool = int
 
@@ -37,3 +43,8 @@ let cJSON_CreateString = foreign "cJSON_CreateString" (string @-> returning (ptr
 
 (* CJSON_PUBLIC(cJSON_bool) cJSON_IsTrue(const cJSON * const item); *)
 let cJSON_IsTrue = foreign "cJSON_IsTrue" (ptr cJSON @-> returning cJSON_bool) ;;
+
+let () =
+    Printf.printf "%s \n" (read_file "test.json")
+    let str = read_file "test.json"
+    let new_cJSON = cJSON_Parse str

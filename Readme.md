@@ -10,3 +10,5 @@ To run actual OCaml, run
 $ make
 $ ./interface
 ```
+
+[Link to cJSON file interfaced](https://github.com/DaveGamble/cJSON)

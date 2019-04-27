@@ -34,14 +34,16 @@ let name = field cJSON "string" string
 
 (* UTILS GO HERE -- WRAPPER FUNCTIONS TO ACTUALLY BE ABLE TO PARSE OUT RESULTING TYPES *)
 
-let cJSONtoJSON cJSON_blurb =
-    (* nested function *)
-    (* declare a new json object *)
-        let rec convert current =
-            (* if current = nill return  *)
-            (* then pull out name *)
-            (* then pull out value -- using match *)
-            then call with next
+let cJSONtoJSON hd =
+    []
+
+let run_test_files () =
+    let files = [ "json/shallow.json"; "json/children.json"; "json/deep-children.json"; "json/array.json" ] in
+    let rec run ls =
+        match ls with
+        | hd :: tl -> (cJSONtoJSON hd) :: run tl
+        | [] -> []
+    in let _ = run files in ()
 
 (* shorthand to allocate pointers for a given type *)
 let to_str_ptr str = allocate string str;;
@@ -58,6 +60,7 @@ let cJSON_IsTrue = foreign "cJSON_IsTrue" (ptr cJSON @-> returning cJSON_bool) ;
 
 (* small, temporary run test *)
 let () =
-    Printf.printf "%s \n" (read_file "test.json")
-    let str = read_file "test.json"
+    Printf.printf "%s \n" (read_file "json/test.json")
+    let str = read_file "json/test.json"
     let new_cJSON = cJSON_Parse str
+    let _ = run_test_files ()

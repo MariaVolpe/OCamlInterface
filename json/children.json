@@ -1,0 +1,8 @@
+{ 
+    "hello": {
+        "world": "test",
+        "integer": 10
+    },
+    "second": "just a string",
+    "more_strings": "its a string again"
+}

@@ -76,31 +76,6 @@ let sample_json = [ ("first_field", String "hello_world_1");
                     ("fifth_field", Bool 1);
                     ]
 
-(* let getValueTuple current =
-    let c_name = getf current name in
-    let c_type = begin getf current json_type end in
-    print_int c_type; 
-    []
-    (* match c_type with
-    | 0 -> ("c_name", Bool false)
-    | 1 -> ("c_name", Bool true)
-    | 2 -> ("c_name", Null)
-    | 3 -> ("c_name", Float begin getf current valuedouble end)
-    | 4 -> ("c_name", String begin getf current valuestring end) *)
-    (* | 5 -> (c_name, Child "placeholder") *)
-    (* | 6 -> (c_name, Child begin getf current next end) *)
-    (* | 7 -> (c_name, Child "placeholder")
-    | _ -> () TODO: raise exception, invalid json *) *)
-(* 
-let match_print item =
-    match item with
-    | Float f -> print_float f
-    | String s -> print_string s
-    | Bool b -> print_string b
-    | Child c -> 
-    | Null ->  *)
-
-
 let match_return item =
     match item with
     | Float f -> cJSON_CreateNumber f

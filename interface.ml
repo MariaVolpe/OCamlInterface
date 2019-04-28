@@ -84,11 +84,23 @@ let match_return item =
     (* | Child c -> 
     | Null ->  *)
 
-(* 
-let rec print_ocaml_json ls =
-    match ls with
-    | (a, b) :: tl -> print_string a; print_ocaml_json tl
-    | [] -> () *)
+
+let match_print item =
+    match item with
+    | Float f -> Printf.printf "%f,\n" f
+    | String s -> Printf.printf "\"%s\",\n" s
+    | Bool b -> if b = 1 then Printf.printf "%s,\n" "true"
+                else Printf.printf "%s,\n" "false"
+    | Child c -> print_string "{" (* todo *)
+    | Null -> print_string "null,"
+
+let print ls =
+    let _ = print_string "\n\n{\n" in
+    let rec print_ocaml_json ls =
+        match ls with
+        | (a, b) :: tl -> Printf.printf "\"%s\": " a; match_print b; print_ocaml_json tl;
+        | [] -> ()
+    in let _ = print_ocaml_json ls in print_string "}\n"
 
 let build_json ls = 
     let base_cJSON = cJSON_CreateObject () in
@@ -114,6 +126,7 @@ let () =
     let json_results = build_json sample_json
     let str = cJSON_Print json_results
     let _ = print_string str
+    let _ = print sample_json
     
 
     

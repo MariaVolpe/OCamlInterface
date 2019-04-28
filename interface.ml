@@ -75,8 +75,13 @@ let sample_json = [ ("first_field", String "hello_world_1");
                     ("third_field", Float 10.1);
                     ("fourth_field", Bool 0);
                     ("fifth_field", Bool 1);
-                    ("sixth_field", Child [("child_field", Float 222.2222); ("child_field2", String "test")]);
-                    ("seventh_field", Array [("0", Float 222.2222); ("1", String "test")]);                                     
+                    ("sixth_field", Child [("child_field", Float 222.2222)]);
+                    ("seventh_field", Array [("0", Float 222.2222); ("1", String "test")]); 
+                    (* ("eigth_field", Child [("child_field", Float 222.2222);
+                                            ("child_field2", Child [
+                                                                ("child_child_field", Bool 1);
+                                                                ("child_child_next", Bool 2)]
+                                            )]);                                     *)
                     ]
 
 let match_return item =
@@ -100,7 +105,7 @@ let print ls =
     | Bool b -> if b = 1 then Printf.printf "%s,\n" "true"
                 else Printf.printf "%s,\n" "false"
     | Child c -> print_string "{\n"; print_ocaml_json c; print_string "}";
-    | Array c -> print_string "[\n"; print_ocaml_json c; print_string "]";
+    | Array a -> print_string "[\n"; print_ocaml_json a; print_string "]";
     | Null -> print_string "null,"
     and
     print_ocaml_json ls =

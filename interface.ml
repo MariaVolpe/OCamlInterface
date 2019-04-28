@@ -74,7 +74,7 @@ let sample_json = [ ("first_field", String "hello_world_1");
                     ("third_field", Float 10.1);
                     ("fourth_field", Bool 0);
                     ("fifth_field", Bool 1);
-                    ("sixth_field", Child [("child_field", Float 222.2222)])
+                    ("sixth_field", Child [("child_field", Float 222.2222); ("child_field2", String "test")])
                     ]
 
 let match_return item =
@@ -84,7 +84,7 @@ let match_return item =
     | Bool b -> cJSON_CreateBool b
     | Child c -> cJSON_CreateObject ()
     (* | Null ->  *)
-
+(* 
 let match_print item =
     match item with
     | Float f -> Printf.printf "%f,\n" f
@@ -92,15 +92,24 @@ let match_print item =
     | Bool b -> if b = 1 then Printf.printf "%s,\n" "true"
                 else Printf.printf "%s,\n" "false"
     | Child c -> print_string "{" (* todo *)
-    | Null -> print_string "null,"
+    | Null -> print_string "null," *)
 
 let print ls =
     let _ = print_string "\n\n{\n" in
-    let rec print_ocaml_json ls =
+    let rec match_print item =
+    match item with
+    | Float f -> Printf.printf "%f,\n" f
+    | String s -> Printf.printf "\"%s\",\n" s
+    | Bool b -> if b = 1 then Printf.printf "%s,\n" "true"
+                else Printf.printf "%s,\n" "false"
+    | Child c -> print_string "{\n"; print_ocaml_json c; print_string "}";
+    | Null -> print_string "null,"
+    and
+    print_ocaml_json ls =
         match ls with
         | (a, b) :: tl -> Printf.printf "\"%s\": " a; match_print b; print_ocaml_json tl;
         | [] -> ()
-    in let _ = print_ocaml_json ls in print_string "}\n"
+    in let _ = print_ocaml_json ls in print_string "\n}\n"
 
 let build_json ls = 
     let base_cJSON = cJSON_CreateObject () in

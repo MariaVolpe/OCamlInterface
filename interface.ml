@@ -76,7 +76,7 @@ let sample_json = [ ("first_field", String "hello_world_1");
                     ("fourth_field", Bool 0);
                     ("fifth_field", Bool 1);
                     ("sixth_field", Child [("child_field", Float 222.2222); ("child_field2", String "test")]);
-                    ("seventh_field", Array [("child_field", Float 222.2222); ("child_field2", String "test")]);                                     
+                    ("seventh_field", Array [("0", Float 222.2222); ("1", String "test")]);                                     
                     ]
 
 let match_return item =

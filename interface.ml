@@ -76,16 +76,16 @@ let to_double_ptr dbl = allocate double dbl;; *)
 let sample_json = [ ("first_field", String "hello_world_1");
                     ("second_field", String "hello_world_2");
                     ("second_field", String "hello_world_2");
-                    ("third_field", Float 10.1);
+                    ("third_field", Float 0.0000);
                     ("fourth_field", Bool 0);
                     ("fifth_field", Bool 1);
-                    ("sixth_field", Child [("child_field", Float 222.2222)]);
-                    ("seventh_field", Array [("0", Float 222.2222); ("1", String "test")]); 
-                    (* ("eigth_field", Child [("child_field", Float 222.2222);
+                    ("sixth_field", Child [("child_field", Float 1.1111)]);
+                    ("seventh_field", Array [("0", Float 2.2222); ("1", String "test")]); 
+                    ("eigth_field", Child [("child_field", Float 3.33333);
                                             ("child_field2", Child [
                                                                 ("child_child_field", Bool 1);
                                                                 ("child_child_next", Bool 2)]
-                                            )]);                                     *)
+                                            )]);                                    
                     ]
 let notInt i = 
     try ignore (int_of_string i); false
@@ -108,7 +108,7 @@ let print ls =
         | (a, b) :: tl -> if begin notInt a end then
                             begin Printf.printf "\"%s\": " a; match_print b; print_ocaml_json tl; end
                             else
-                            print_string ""; match_print b; print_ocaml_json tl;
+                            begin print_string ""; match_print b; print_ocaml_json tl; end
         | [] -> ()
     in let _ = print_ocaml_json ls in print_string "\n}\n"
 
@@ -152,8 +152,8 @@ let () =
     let json_results = build_json sample_json
     let str = cJSON_Print json_results
     let _ = print_string str
-    let _ = output_to_file json_results
-    (* let _ = print sample_json *)
+    (* let _ = output_to_file json_results *)
+    let _ = print sample_json
     
 
     

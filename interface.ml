@@ -112,22 +112,22 @@ let print ls =
         | [] -> ()
     in let _ = print_ocaml_json ls in print_string "\n}\n"
 
-let match_return item =
-    match item with
-    | Float f -> cJSON_CreateNumber f
-    | String s -> cJSON_CreateString s
-    | Bool b -> cJSON_CreateBool b
-    | Child c -> cJSON_CreateObject () (* todo *)
-    | Array a -> cJSON_CreateArray () (* todo *)
-    | Null -> cJSON_CreateNull ()
 
 let build_json ls = 
     let base_cJSON = cJSON_CreateObject () in
-    let rec build ls =
+    let rec match_return item =
+        match item with
+        | Float f -> cJSON_CreateNumber f
+        | String s -> cJSON_CreateString s
+        | Bool b -> cJSON_CreateBool b
+        | Child c -> cJSON_CreateObject () (* todo *)
+        | Array a -> cJSON_CreateArray () (* todo *)
+        | Null -> cJSON_CreateNull ()
+    and build json_obj ls =
         match ls with
-        | (a, b) :: tl -> cJSON_AddItemToObject base_cJSON a begin match_return b end; build tl
+        | (a, b) :: tl -> cJSON_AddItemToObject json_obj a begin match_return b end; build json_obj tl
         | [] -> ()
-    in let _ = build ls in base_cJSON
+    in let _ = build base_cJSON ls in base_cJSON
 
 let output_to_file cJSON_obj =
     let file = "results.json" in
@@ -150,9 +150,9 @@ let () =
     let _ = print_string str_2
     let _ = print_ocaml_json sample_json *)
     let json_results = build_json sample_json
-    let str = cJSON_Print json_results
-    let _ = print_string str
-    (* let _ = output_to_file json_results *)
+    (* let str = cJSON_Print json_results
+    let _ = print_string str *)
+    let _ = output_to_file json_results
     let _ = print sample_json
     
 

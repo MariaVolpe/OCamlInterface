@@ -74,6 +74,7 @@ let sample_json = [ ("first_field", String "hello_world_1");
                     ("third_field", Float 10.1);
                     ("fourth_field", Bool 0);
                     ("fifth_field", Bool 1);
+                    ("sixth_field", Child [("child_field", Float 222.2222)])
                     ]
 
 let match_return item =
@@ -81,9 +82,8 @@ let match_return item =
     | Float f -> cJSON_CreateNumber f
     | String s -> cJSON_CreateString s
     | Bool b -> cJSON_CreateBool b
-    (* | Child c -> 
-    | Null ->  *)
-
+    | Child c -> cJSON_CreateObject ()
+    (* | Null ->  *)
 
 let match_print item =
     match item with

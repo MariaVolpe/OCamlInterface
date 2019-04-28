@@ -115,17 +115,23 @@ let print ls =
 
 let build_json ls = 
     let base_cJSON = cJSON_CreateObject () in
-    let rec match_return item =
+    let rec match_return item ls =
         match item with
         | Float f -> cJSON_CreateNumber f
         | String s -> cJSON_CreateString s
         | Bool b -> cJSON_CreateBool b
-        | Child c -> cJSON_CreateObject () (* todo *)
-        | Array a -> cJSON_CreateArray () (* todo *)
+        | Child c -> let new_obj = cJSON_CreateObject () in
+                let _ =
+                    build new_obj c
+                in new_obj
+        | Array a -> let new_arr = cJSON_CreateArray () in
+                let _ =
+                    build new_arr a
+                in new_arr
         | Null -> cJSON_CreateNull ()
     and build json_obj ls =
         match ls with
-        | (a, b) :: tl -> cJSON_AddItemToObject json_obj a begin match_return b end; build json_obj tl
+        | (a, b) :: tl -> cJSON_AddItemToObject json_obj a begin match_return b ls end; build json_obj tl
         | [] -> ()
     in let _ = build base_cJSON ls in base_cJSON
 

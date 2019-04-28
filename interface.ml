@@ -10,7 +10,7 @@ type value = Float of float
             | String of string
             | Bool of int (* in cJSON, a bool is represented by an int *)
             | Child of json
-            | Array of json
+            | Array of json (* like a child but with integer keys *)
             | Null
 and node = name * value
 and json = node list
@@ -51,7 +51,7 @@ let cJSON_CreateNull = foreign "cJSON_CreateNull" (void @-> returning (ptr cJSON
 (* CJSON_PUBLIC(cJSON * ) cJSON_CreateObject(void); *)
 let cJSON_CreateObject = foreign "cJSON_CreateObject" (void @-> returning (ptr cJSON)) ;;
 
-(* CJSON_PUBLIC(cJSON *) cJSON_CreateArray(void); *)
+(* CJSON_PUBLIC(cJSON * ) cJSON_CreateArray(void); *)
 let cJSON_CreateArray = foreign "cJSON_CreateArray" (void @-> returning (ptr cJSON)) ;;
 
 (* CJSON_PUBLIC(void) cJSON_AddItemToObject(cJSON *object, const char *string, cJSON *item); *)
@@ -86,16 +86,6 @@ let sample_json = [ ("first_field", String "hello_world_1");
                                                                 ("child_child_next", Bool 2)]
                                             )]);                                     *)
                     ]
-
-let match_return item =
-    match item with
-    | Float f -> cJSON_CreateNumber f
-    | String s -> cJSON_CreateString s
-    | Bool b -> cJSON_CreateBool b
-    | Child c -> cJSON_CreateObject () (* todo *)
-    | Array a -> cJSON_CreateArray () (* todo *)
-    | Null -> cJSON_CreateNull ()
-
 let notInt i = 
     try ignore (int_of_string i); false
     with _ -> true
@@ -120,6 +110,15 @@ let print ls =
                             print_string ""; match_print b; print_ocaml_json tl;
         | [] -> ()
     in let _ = print_ocaml_json ls in print_string "\n}\n"
+
+let match_return item =
+    match item with
+    | Float f -> cJSON_CreateNumber f
+    | String s -> cJSON_CreateString s
+    | Bool b -> cJSON_CreateBool b
+    | Child c -> cJSON_CreateObject () (* todo *)
+    | Array a -> cJSON_CreateArray () (* todo *)
+    | Null -> cJSON_CreateNull ()
 
 let build_json ls = 
     let base_cJSON = cJSON_CreateObject () in

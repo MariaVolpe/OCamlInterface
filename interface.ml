@@ -38,11 +38,22 @@ let to_str_ptr str = allocate string str;;
 let to_int_ptr i = allocate int i;;
 let to_double_ptr dbl = allocate double dbl;;
 
-let sample_json = [ "first_field" * String "hello_world_1";
-                    "second_field" * String "hello_world_2";
-                    "second_field" * String "hello_world_2";
-                    "third_field" * Float 10.1;
+let sample_json = [ ("first_field", String "hello_world_1");
+                    ("second_field", String "hello_world_2");
+                    ("second_field", String "hello_world_2");
+                    ("third_field", Float 10.1)
                     ]
+
+let rec print_ocaml_json ls =
+    match ls with
+    | (a, b) :: tl -> print_string a; print_ocaml_json tl
+    | [] -> ()
+
+let rec build_json ls =
+    match ls with
+    | (a, b) :: tl -> 
+    | [] -> 
+
 
 (* JSON FUNCTIONS *)
 
@@ -55,14 +66,11 @@ let cJSON_CreateObject = foreign "cJSON_CreateObject" (void @-> returning (ptr c
 (* CJSON_PUBLIC(void) cJSON_AddItemToObject(cJSON *object, const char *string, cJSON *item); *)
 let cJSON_AddItemToObject = foreign "cJSON_AddItemToObject" (ptr cJSON @-> string @-> ptr cJSON @-> returning void) ;;
 
-
 (* CJSON_PUBLIC(char * ) cJSON_Print(const cJSON *item); *)
 let cJSON_Print = foreign "cJSON_Print" (ptr cJSON @-> returning string) ;;
 
-
 (* CJSON_PUBLIC(cJSON * ) cJSON_Parse(const char *value); *)
 let cJSON_Parse = foreign "cJSON_Parse" (string @-> returning (ptr cJSON)) ;;
-
 
 (* CJSON_PUBLIC(cJSON_bool) cJSON_IsTrue(const cJSON * const item); *)
 let cJSON_IsTrue = foreign "cJSON_IsTrue" (ptr cJSON @-> returning cJSON_bool) ;;
@@ -77,6 +85,7 @@ let () =
     let final = cJSON_AddItemToObject base_cJSON "my_num" num_item
     let str_2 = cJSON_Print base_cJSON
     let _ = print_string str_2
+    let _ = print_ocaml_json sample_json
     
 
     

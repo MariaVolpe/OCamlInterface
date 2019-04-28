@@ -87,9 +87,9 @@ let match_return item =
     | Child c -> cJSON_CreateObject () (* todo *)
     | Null -> cJSON_CreateNull ()
 
-let isInt i= 
-    try ignore (int_of_string i); true
-    with _ -> false
+let notInt i = 
+    try ignore (int_of_string i); false
+    with _ -> true
 
 let print ls =
     let _ = print_string "\n\n{\n" in
@@ -105,10 +105,10 @@ let print ls =
     and
     print_ocaml_json ls =
         match ls with
-        | (a, b) :: tl -> if begin isInt a end then
-                            begin match_print b; print_ocaml_json tl end
-                            else 
-                            Printf.printf "\"%s\": " a; match_print b; print_ocaml_json tl;
+        | (a, b) :: tl -> if begin notInt a end then
+                            begin Printf.printf "\"%s\": " a; match_print b; print_ocaml_json tl; end
+                            else
+                            print_string ""; match_print b; print_ocaml_json tl;
         | [] -> ()
     in let _ = print_ocaml_json ls in print_string "\n}\n"
 

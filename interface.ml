@@ -10,6 +10,7 @@ type value = Float of float
             | String of string
             | Bool of int (* in cJSON, a bool is represented by an int *)
             | Child of json
+            | Array of json
             | Null
 and node = name * value
 and json = node list
@@ -74,7 +75,8 @@ let sample_json = [ ("first_field", String "hello_world_1");
                     ("third_field", Float 10.1);
                     ("fourth_field", Bool 0);
                     ("fifth_field", Bool 1);
-                    ("sixth_field", Child [("child_field", Float 222.2222); ("child_field2", String "test")])
+                    ("sixth_field", Child [("child_field", Float 222.2222); ("child_field2", String "test")]);
+                    ("seventh_field", Array [("child_field", Float 222.2222); ("child_field2", String "test")]);                                     
                     ]
 
 let match_return item =
@@ -85,6 +87,10 @@ let match_return item =
     | Child c -> cJSON_CreateObject () (* todo *)
     | Null -> cJSON_CreateNull ()
 
+let isInt i= 
+    try ignore (int_of_string i); true
+    with _ -> false
+
 let print ls =
     let _ = print_string "\n\n{\n" in
     let rec match_print item =
@@ -94,11 +100,15 @@ let print ls =
     | Bool b -> if b = 1 then Printf.printf "%s,\n" "true"
                 else Printf.printf "%s,\n" "false"
     | Child c -> print_string "{\n"; print_ocaml_json c; print_string "}";
+    | Array c -> print_string "[\n"; print_ocaml_json c; print_string "]";
     | Null -> print_string "null,"
     and
     print_ocaml_json ls =
         match ls with
-        | (a, b) :: tl -> Printf.printf "\"%s\": " a; match_print b; print_ocaml_json tl;
+        | (a, b) :: tl -> if begin isInt a end then
+                            begin match_print b; print_ocaml_json tl end
+                            else 
+                            Printf.printf "\"%s\": " a; match_print b; print_ocaml_json tl;
         | [] -> ()
     in let _ = print_ocaml_json ls in print_string "\n}\n"
 
@@ -121,9 +131,9 @@ let () =
     let str_2 = cJSON_Print base_cJSON
     let _ = print_string str_2
     let _ = print_ocaml_json sample_json *)
-    let json_results = build_json sample_json
+    (* let json_results = build_json sample_json
     let str = cJSON_Print json_results
-    let _ = print_string str
+    let _ = print_string str *)
     let _ = print sample_json
     
 

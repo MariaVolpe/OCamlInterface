@@ -124,9 +124,10 @@ let () =
     Printf.printf "%s \n" (read_file "json/shallow.json")
     let str = read_file "json/shallow.json"
     let ptr_cJSON = cJSON_Parse str
-    (* let new_cJSON = !@(ptr_cJSON) *)
+    (* let coerce_ptr = coerce (ptr cJSON) cJSON *)
+    (* let new_cJSON = coerce ptr_cJSON) *)
     (* let any = cJSONtoJSON new_cJSON *)
-    let any = getf ptr_cJSON child
+    let any = getf ptr_cJSON next
     (* let any = 
         match new_cJSON with
         | cJSON -> print_string "cJSON"

@@ -44,7 +44,8 @@ let cJSON_CreateString = foreign "cJSON_CreateString" (string @-> returning (ptr
 (* CJSON_PUBLIC(cJSON * ) cJSON_CreateBool(cJSON_bool boolean); *)
 let cJSON_CreateBool = foreign "cJSON_CreateBool" (cJSON_bool @-> returning (ptr cJSON)) ;;
 
-
+(* CJSON_PUBLIC(cJSON * ) cJSON_CreateNull(void); *)
+let cJSON_CreateNull = foreign "cJSON_CreateNull" (void @-> returning (ptr cJSON)) ;;
 
 (* CJSON_PUBLIC(cJSON * ) cJSON_CreateObject(void); *)
 let cJSON_CreateObject = foreign "cJSON_CreateObject" (void @-> returning (ptr cJSON)) ;;
@@ -62,11 +63,10 @@ let cJSON_Parse = foreign "cJSON_Parse" (string @-> returning (ptr cJSON)) ;;
 let cJSON_IsTrue = foreign "cJSON_IsTrue" (ptr cJSON @-> returning cJSON_bool) ;;
 
 
-
 (* shorthand to allocate pointers for a given type *)
-let to_str_ptr str = allocate string str;;
+(* let to_str_ptr str = allocate string str;;
 let to_int_ptr i = allocate int i;;
-let to_double_ptr dbl = allocate double dbl;;
+let to_double_ptr dbl = allocate double dbl;; *)
 
 let sample_json = [ ("first_field", String "hello_world_1");
                     ("second_field", String "hello_world_2");
@@ -82,17 +82,8 @@ let match_return item =
     | Float f -> cJSON_CreateNumber f
     | String s -> cJSON_CreateString s
     | Bool b -> cJSON_CreateBool b
-    | Child c -> cJSON_CreateObject ()
-    (* | Null ->  *)
-(* 
-let match_print item =
-    match item with
-    | Float f -> Printf.printf "%f,\n" f
-    | String s -> Printf.printf "\"%s\",\n" s
-    | Bool b -> if b = 1 then Printf.printf "%s,\n" "true"
-                else Printf.printf "%s,\n" "false"
-    | Child c -> print_string "{" (* todo *)
-    | Null -> print_string "null," *)
+    | Child c -> cJSON_CreateObject () (* todo *)
+    | Null -> cJSON_CreateNull ()
 
 let print ls =
     let _ = print_string "\n\n{\n" in
@@ -118,8 +109,6 @@ let build_json ls =
         | (a, b) :: tl -> cJSON_AddItemToObject base_cJSON a begin match_return b end; build tl
         | [] -> ()
     in let _ = build ls in base_cJSON
-
-
 
 (* small, temporary run test *)
 let () =

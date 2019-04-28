@@ -65,37 +65,36 @@ let ifNull arg =
 
 let getValueTuple current =
     let c_name = getf current name in
-    let c_type = getf current json_type in
-    match c_type with
-    | 0 -> (c_name, Bool false)
-    | 1 -> (c_name, Bool true)
-    | 2 -> (c_name, Null)
-    | 3 -> (c_name, Float begin getf current valuedouble end)
-    | 4 -> (c_name, String begin getf current valuestring end)
+    let c_type = begin getf current json_type end in
+    print_int c_type; 
+    []
+    (* match c_type with
+    | 0 -> ("c_name", Bool false)
+    | 1 -> ("c_name", Bool true)
+    | 2 -> ("c_name", Null)
+    | 3 -> ("c_name", Float begin getf current valuedouble end)
+    | 4 -> ("c_name", String begin getf current valuestring end) *)
     (* | 5 -> (c_name, Child "placeholder") *)
     (* | 6 -> (c_name, Child begin getf current next end) *)
     (* | 7 -> (c_name, Child "placeholder")
     | _ -> () TODO: raise exception, invalid json *)
 
 let cJSONtoJSON cJSON_blurb =
-    let json = [] in
-    let convert current ls =
+    let rec convert current =
         if ifNull current
             then []
         else
-            []
-    in ()
-
-let cJSONtoJSON hd =
-    []
-
+            [begin getValueTuple current end]
+            (* @ begin convert begin getf current next end end *)
+    in convert cJSON_blurb
+(* 
 let run_test_files () =
     let files = [ "json/shallow.json"; "json/children.json"; "json/deep-children.json"; "json/array.json" ] in
     let rec run ls =
         match ls with
         | hd :: tl -> (cJSONtoJSON hd) :: run tl
         | [] -> []
-    in let ls = run files in print_json ls
+    in let ls = run files in print_json ls *)
 
 (* shallow implementation *)
 (* let rec print_node node =
@@ -106,8 +105,6 @@ let rec print_json ls =
     match ls with
     | hd :: tl -> print_node hd; print_json tl; ()
     | [] -> () *)
-
-
 
 (* shorthand to allocate pointers for a given type *)
 let to_str_ptr str = allocate string str;;
@@ -124,7 +121,16 @@ let cJSON_IsTrue = foreign "cJSON_IsTrue" (ptr cJSON @-> returning cJSON_bool) ;
 
 (* small, temporary run test *)
 let () =
-    Printf.printf "%s \n" (read_file "json/test.json")
-    let str = read_file "json/test.json"
-    let new_cJSON = cJSON_Parse str
-    let _ = run_test_files ()
+    Printf.printf "%s \n" (read_file "json/shallow.json")
+    let str = read_file "json/shallow.json"
+    let ptr_cJSON = cJSON_Parse str
+    (* let coerce_ptr = coerce (ptr cJSON) cJSON *)
+    (* let new_cJSON = coerce ptr_cJSON) *)
+    (* let any = cJSONtoJSON new_cJSON *)
+    let any = getf ptr_cJSON next
+    (* let any = 
+        match new_cJSON with
+        | cJSON -> print_string "cJSON"
+        | _ -> print_string "not"
+     *)
+    (* let _ = run_test_files () *)

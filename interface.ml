@@ -1,6 +1,7 @@
 open Ctypes
 open PosixTypes
 open Foreign
+open Printf
 
 let read_file = foreign "read_file" (string @-> returning string) ;;
 
@@ -128,6 +129,15 @@ let build_json ls =
         | [] -> ()
     in let _ = build ls in base_cJSON
 
+let output_to_file cJSON_obj =
+    let file = "results.json" in
+    let str_rep = cJSON_Print cJSON_obj in
+    let oc = open_out file in
+    let output () =
+        fprintf oc "%s\n" str_rep;
+        close_out oc
+    in output ()
+
 (* small, temporary run test *)
 let () =
     Printf.printf "%s \n" (read_file "json/shallow.json")
@@ -139,10 +149,11 @@ let () =
     let str_2 = cJSON_Print base_cJSON
     let _ = print_string str_2
     let _ = print_ocaml_json sample_json *)
-    (* let json_results = build_json sample_json
+    let json_results = build_json sample_json
     let str = cJSON_Print json_results
-    let _ = print_string str *)
-    let _ = print sample_json
+    let _ = print_string str
+    let _ = output_to_file json_results
+    (* let _ = print sample_json *)
     
 
     

@@ -71,7 +71,9 @@ let to_double_ptr dbl = allocate double dbl;;
 let sample_json = [ ("first_field", String "hello_world_1");
                     ("second_field", String "hello_world_2");
                     ("second_field", String "hello_world_2");
-                    ("third_field", Float 10.1)
+                    ("third_field", Float 10.1);
+                    ("fourth_field", Bool 0);
+                    ("fifth_field", Bool 1);
                     ]
 
 (* let getValueTuple current =

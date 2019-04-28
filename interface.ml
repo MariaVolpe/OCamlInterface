@@ -53,6 +53,9 @@ let cJSONtoJSON cJSON_blurb =
     convert cJSON_blurb json json
          *)
 
+let print_json ls =
+    []
+
 let get field =
     (* getf cJSON_blurb field *)
     false
@@ -81,18 +84,6 @@ let cJSONtoJSON cJSON_blurb =
             then []
         else
             []
-            (* let c_name = getf cJSON_blurb name in
-            let c_type = getf cJSON_blurb json_type in
-            match c_type with
-            | 0 -> (c_name, Bool false)
-            | 1 -> (c_name, Bool true)
-            | 2 -> (c_name, Null)
-            | 3 -> (c_name, Float 10.0)
-            | 4 -> (c_name, String "placeholder")
-            | 5 -> (c_name, Child "placeholder")
-            | 6 -> (c_name, Child "placeholder")
-            | 7 -> (c_name, Child "placeholder")
-            | _ -> () TODO: raise exception, invalid json *)
     in ()
 
 let cJSONtoJSON hd =
@@ -104,17 +95,19 @@ let run_test_files () =
         match ls with
         | hd :: tl -> (cJSONtoJSON hd) :: run tl
         | [] -> []
-    in let _ = run files in ()
+    in let ls = run files in print_json ls
 
 (* shallow implementation *)
-let rec print_node node =
+(* let rec print_node node =
     []
     (* match node  *)
 
 let rec print_json ls =
     match ls with
     | hd :: tl -> print_node hd; print_json tl; ()
-    | [] -> ()
+    | [] -> () *)
+
+
 
 (* shorthand to allocate pointers for a given type *)
 let to_str_ptr str = allocate string str;;

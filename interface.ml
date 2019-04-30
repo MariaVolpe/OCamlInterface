@@ -79,12 +79,12 @@ let sample_json = [ (ObjKey "first_field", String "hello_world_1");
                                             )]);                                    
                     ]
 
-let getFormattedNameField key =
+let get_formatted_name_field key =
     match key with
     | ArrKey i -> begin format_of_string "%s" end
     | ObjKey s -> begin format_of_string "\"%s\": " end
 
-let getRawNameFieldContents key =
+let get_raw_name_field_contents key =
     match key with
     | ArrKey i -> ""
     | ObjKey s -> s
@@ -104,7 +104,7 @@ let print ls =
     print_ocaml_json ls =
         match ls with
         | (a, b) :: tl ->   begin
-                                Printf.printf begin getFormattedNameField a end begin getNameFieldContents a end;
+                                Printf.printf begin get_formatted_name_field a end begin get_raw_name_field_contents a end;
                                 match_print b;
                                 print_ocaml_json tl;
                             end
@@ -129,7 +129,7 @@ let build_json ls =
         | Null -> cJSON_CreateNull ()
     and build json_obj ls =
         match ls with
-        | (a, b) :: tl ->   cJSON_AddItemToObject json_obj begin getNameFieldContents a end begin match_return b ls end;
+        | (a, b) :: tl ->   cJSON_AddItemToObject json_obj begin get_raw_name_field_contents a end begin match_return b ls end;
                             build json_obj tl
         | [] -> ()
     in let _ = build base_cJSON ls in base_cJSON

@@ -2,8 +2,6 @@ open Ctypes
 open Foreign
 open Printf
 
-let read_file = foreign "read_file" (string @-> returning string) ;;
-
 (* ocaml variant equivalent to cJSON c struct *)
 type name = string
 type value = Float of float
@@ -15,9 +13,9 @@ type value = Float of float
 and node = name * value
 and json = node list
 
-(* cJSON *)
+(* -------------- cJSON interface -------------- *)
 
-(* TYPE DECLARATIONS *)
+(* ------ TYPE DECLARATIONS ------ *)
 
 (* typedef int cJSON_bool; *)
 let cJSON_bool = int
@@ -34,43 +32,37 @@ let valueint = field cJSON "valueint" int
 let valuedouble = field cJSON "valuedouble" double
 let name = field cJSON "string" string
 
-(* JSON FUNCTIONS *)
+(* ------ cJSON FUNCTIONS ------ *)
 
 (* CJSON_PUBLIC(cJSON * ) cJSON_CreateNumber(double num); *)
-let cJSON_CreateNumber = foreign "cJSON_CreateNumber" (double @-> returning (ptr cJSON)) ;;
+let cJSON_CreateNumber = foreign "cJSON_CreateNumber" (double @-> returning (ptr cJSON))
 
 (* CJSON_PUBLIC(cJSON * ) cJSON_CreateString(const char *string); *)
-let cJSON_CreateString = foreign "cJSON_CreateString" (string @-> returning (ptr cJSON)) ;;
+let cJSON_CreateString = foreign "cJSON_CreateString" (string @-> returning (ptr cJSON))
 
 (* CJSON_PUBLIC(cJSON * ) cJSON_CreateBool(cJSON_bool boolean); *)
-let cJSON_CreateBool = foreign "cJSON_CreateBool" (cJSON_bool @-> returning (ptr cJSON)) ;;
+let cJSON_CreateBool = foreign "cJSON_CreateBool" (cJSON_bool @-> returning (ptr cJSON))
 
 (* CJSON_PUBLIC(cJSON * ) cJSON_CreateNull(void); *)
-let cJSON_CreateNull = foreign "cJSON_CreateNull" (void @-> returning (ptr cJSON)) ;;
+let cJSON_CreateNull = foreign "cJSON_CreateNull" (void @-> returning (ptr cJSON))
 
 (* CJSON_PUBLIC(cJSON * ) cJSON_CreateObject(void); *)
-let cJSON_CreateObject = foreign "cJSON_CreateObject" (void @-> returning (ptr cJSON)) ;;
+let cJSON_CreateObject = foreign "cJSON_CreateObject" (void @-> returning (ptr cJSON))
 
 (* CJSON_PUBLIC(cJSON * ) cJSON_CreateArray(void); *)
-let cJSON_CreateArray = foreign "cJSON_CreateArray" (void @-> returning (ptr cJSON)) ;;
+let cJSON_CreateArray = foreign "cJSON_CreateArray" (void @-> returning (ptr cJSON))
 
 (* CJSON_PUBLIC(void) cJSON_AddItemToObject(cJSON *object, const char *string, cJSON *item); *)
-let cJSON_AddItemToObject = foreign "cJSON_AddItemToObject" (ptr cJSON @-> string @-> ptr cJSON @-> returning void) ;;
+let cJSON_AddItemToObject = foreign "cJSON_AddItemToObject" (ptr cJSON @-> string @-> ptr cJSON @-> returning void)
 
 (* CJSON_PUBLIC(char * ) cJSON_Print(const cJSON *item); *)
-let cJSON_Print = foreign "cJSON_Print" (ptr cJSON @-> returning string) ;;
+let cJSON_Print = foreign "cJSON_Print" (ptr cJSON @-> returning string)
 
 (* CJSON_PUBLIC(cJSON * ) cJSON_Parse(const char *value); *)
-let cJSON_Parse = foreign "cJSON_Parse" (string @-> returning (ptr cJSON)) ;;
-
-(* CJSON_PUBLIC(cJSON_bool) cJSON_IsTrue(const cJSON * const item); *)
-let cJSON_IsTrue = foreign "cJSON_IsTrue" (ptr cJSON @-> returning cJSON_bool) ;;
+let cJSON_Parse = foreign "cJSON_Parse" (string @-> returning (ptr cJSON))
 
 
-(* shorthand to allocate pointers for a given type *)
-(* let to_str_ptr str = allocate string str;;
-let to_int_ptr i = allocate int i;;
-let to_double_ptr dbl = allocate double dbl;; *)
+(* -------------- OCaml Functionality -------------- *)
 
 let sample_json = [ ("first_field", String "hello_world_1");
                     ("second_field", String "hello_world_2");
@@ -111,7 +103,6 @@ let print ls =
         | [] -> ()
     in let _ = print_ocaml_json ls in print_string "\n}\n"
 
-
 let build_json ls = 
     let base_cJSON = cJSON_CreateObject () in
     let rec match_return item ls =
@@ -143,25 +134,9 @@ let output_to_file cJSON_obj =
         close_out oc
     in output ()
 
-(* small, temporary run test *)
+(* -------------- run -------------- *)
+
 let () =
-    Printf.printf "%s \n" (read_file "json/shallow.json")
-    (* let str = read_file "json/shallow.json"
-    let ptr_cJSON = cJSON_Parse str
-    let base_cJSON = cJSON_CreateObject ()
-    let num_item = cJSON_CreateNumber 10.0
-    let final = cJSON_AddItemToObject base_cJSON "my_num" num_item
-    let str_2 = cJSON_Print base_cJSON
-    let _ = print_string str_2
-    let _ = print_ocaml_json sample_json *)
-    let json_results = build_json sample_json
-    (* let str = cJSON_Print json_results
-    let _ = print_string str *)
-    let _ = output_to_file json_results
-    let _ = print sample_json
-    
-
-    
-    
-
-    
+    let json_results = build_json sample_json in
+    let _ = output_to_file json_results in
+    let _ = print sample_json in ()

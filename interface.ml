@@ -86,13 +86,13 @@ let sample_json = [ (ObjKey "first_field", String "this is a string");
                                             )]);                                    
                     ]
 
-let get_formatted_name_field key =
-    match key with
+let get_formatted_name_field field =
+    match field with
     | ArrKey i -> begin format_of_string "%s" end
     | ObjKey s -> begin format_of_string "\"%s\": " end
 
-let get_raw_name_field_contents key =
-    match key with
+let get_raw_name_field_contents field =
+    match field with
     | ArrKey i -> ""
     | ObjKey s -> s
 
@@ -102,7 +102,7 @@ let rec print_indents n =
                         print_indents (n-1)
                     end
 
-let print ls =
+let print json_ls =
     let _ = print_string "\n\n{\n" in
     let rec match_print name item num_indents =
         let _ = print_indents num_indents in 
@@ -121,14 +121,14 @@ let print ls =
                         print_indents num_indents;
                         print_string "]\n";
         | Null -> print_string "null,"
-    and print_ocaml_json num_indents ls =
-        match ls with
+    and print_ocaml_json num_indents json_ls =
+        match json_ls with
         | (a, b) :: tl ->   begin
                                 match_print a b num_indents;
                                 print_ocaml_json num_indents tl;
                             end
         | [] -> ()
-    in let _ = print_ocaml_json 1 ls in print_string "\n}\n"
+    in let _ = print_ocaml_json 1 json_ls in print_string "\n}\n"
 
 let build_json ls = 
     let base_cJSON = cJSON_CreateObject () in

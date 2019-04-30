@@ -101,26 +101,31 @@ let rec print_indents n =
 
 let print ls =
     let _ = print_string "\n\n{\n" in
-    let rec match_print item name n =
-        let _ = print_indents n in 
+    let rec match_print name item num_indents =
+        let _ = print_indents num_indents in 
         Printf.printf begin get_formatted_name_field name end begin get_raw_name_field_contents name end;
         match item with
         | Float f -> Printf.printf "%f,\n" f
         | String s -> Printf.printf "\"%s\",\n" s
         | Bool b -> if b = 1 then Printf.printf "%s,\n" "true"
                     else Printf.printf "%s,\n" "false"
-        | Child c -> print_string "{\n"; print_ocaml_json c (n+1); print_indents n; print_string "}\n";
-        | Array a -> print_string "[\n"; print_ocaml_json a (n+1); print_indents n; print_string "]\n";
+        | Child c ->    print_string "{\n";
+                        print_ocaml_json (num_indents+1) c;
+                        print_indents num_indents;
+                        print_string "}\n";
+        | Array a ->    print_string "[\n";
+                        print_ocaml_json (num_indents+1) a;
+                        print_indents num_indents;
+                        print_string "]\n";
         | Null -> print_string "null,"
-    and
-    print_ocaml_json ls n =
+    and print_ocaml_json num_indents ls =
         match ls with
         | (a, b) :: tl ->   begin
-                                match_print b a n;
-                                print_ocaml_json tl n;
+                                match_print a b num_indents;
+                                print_ocaml_json num_indents tl;
                             end
         | [] -> ()
-    in let _ = print_ocaml_json ls 1 in print_string "\n}\n"
+    in let _ = print_ocaml_json 1 ls in print_string "\n}\n"
 
 let build_json ls = 
     let base_cJSON = cJSON_CreateObject () in

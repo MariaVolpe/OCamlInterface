@@ -64,18 +64,25 @@ let cJSON_Parse = foreign "cJSON_Parse" (string @-> returning (ptr cJSON))
 
 (* -------------- OCaml Functionality -------------- *)
 
-let sample_json = [ (ObjKey "first_field", String "hello_world_1");
-                    (ObjKey "second_field", String "hello_world_2");
-                    (ObjKey "second_field", String "hello_world_2");
+let sample_json = [ (ObjKey "first_field", String "this is a string");
+                    (ObjKey "second_field", String "this is also a string");
+                    (ObjKey "second_field", String "we can name these whatever we like!");
                     (ObjKey "third_field", Float 0.0000);
                     (ObjKey "fourth_field", Bool 0);
                     (ObjKey "fifth_field", Bool 1);
                     (ObjKey "sixth_field", Child [(ObjKey "child_field", Float 1.1111)]);
-                    (ObjKey "seventh_field", Array [(ArrKey 0, Float 2.2222); (ArrKey 1, String "test")]); 
+                    (ObjKey "seventh_field", Array [
+                                                        (ArrKey 0, Float 2.2222);
+                                                        (ArrKey 1, String "array string field");
+                                                        (ArrKey 2, Child [
+                                                                            (ObjKey "array_child", String "this string is in an object, in an array!")
+                                                                        ]
+                                                        )
+                                                    ]); 
                     (ObjKey "eigth_field", Child [(ObjKey "child_field", Float 3.33333);
-                                            (ObjKey "child_field2", Child [
-                                                                (ObjKey "child_child_field", Bool 1);
-                                                                (ObjKey "child_child_next", Bool 2)]
+                                            (ObjKey "nested_children", Child [
+                                                                                (ObjKey "child_child_field", Bool 1);
+                                                                                (ObjKey "child_child_next", Bool 2)]
                                             )]);                                    
                     ]
 

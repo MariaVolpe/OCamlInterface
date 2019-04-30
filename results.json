@@ -1,17 +1,19 @@
 {
-	"first_field":	"hello_world_1",
-	"second_field":	"hello_world_2",
-	"second_field":	"hello_world_2",
+	"first_field":	"this is a string",
+	"second_field":	"this is also a string",
+	"second_field":	"we can name these whatever we like!",
 	"third_field":	0,
 	"fourth_field":	false,
 	"fifth_field":	true,
 	"sixth_field":	{
 		"child_field":	1.1111
 	},
-	"seventh_field":	[2.2222, "test"],
+	"seventh_field":	[2.2222, "array string field", {
+			"array_child":	"this string is in an object, in an array!"
+		}],
 	"eigth_field":	{
 		"child_field":	3.33333,
-		"child_field2":	{
+		"nested_children":	{
 			"child_child_field":	true,
 			"child_child_next":	true
 		}

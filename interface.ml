@@ -96,27 +96,31 @@ let get_raw_name_field_contents key =
     | ArrKey i -> ""
     | ObjKey s -> s
 
+let rec print_indents n =
+    if n > 0 then begin print_string "    "; print_indents (n-1) end
+
 let print ls =
     let _ = print_string "\n\n{\n" in
-    let rec match_print item =
-    match item with
-    | Float f -> Printf.printf "%f,\n" f
-    | String s -> Printf.printf "\"%s\",\n" s
-    | Bool b -> if b = 1 then Printf.printf "%s,\n" "true"
-                else Printf.printf "%s,\n" "false"
-    | Child c -> print_string "{\n"; print_ocaml_json c; print_string "}";
-    | Array a -> print_string "[\n"; print_ocaml_json a; print_string "]";
-    | Null -> print_string "null,"
+    let rec match_print item name n =
+        let _ = print_indents n in 
+        Printf.printf begin get_formatted_name_field name end begin get_raw_name_field_contents name end;
+        match item with
+        | Float f -> Printf.printf "%f,\n" f
+        | String s -> Printf.printf "\"%s\",\n" s
+        | Bool b -> if b = 1 then Printf.printf "%s,\n" "true"
+                    else Printf.printf "%s,\n" "false"
+        | Child c -> print_string "{\n"; print_ocaml_json c (n+1); print_indents n; print_string "}\n";
+        | Array a -> print_string "[\n"; print_ocaml_json a (n+1); print_indents n; print_string "]\n";
+        | Null -> print_string "null,"
     and
-    print_ocaml_json ls =
+    print_ocaml_json ls n =
         match ls with
         | (a, b) :: tl ->   begin
-                                Printf.printf begin get_formatted_name_field a end begin get_raw_name_field_contents a end;
-                                match_print b;
-                                print_ocaml_json tl;
+                                match_print b a n;
+                                print_ocaml_json tl n;
                             end
         | [] -> ()
-    in let _ = print_ocaml_json ls in print_string "\n}\n"
+    in let _ = print_ocaml_json ls 1 in print_string "\n}\n"
 
 let build_json ls = 
     let base_cJSON = cJSON_CreateObject () in

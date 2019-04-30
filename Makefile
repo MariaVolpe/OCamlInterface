@@ -1,6 +1,6 @@
 all: interface
 
-interface: interface.ml c_code.c cJSON.c
+interface: interface.ml cJSON.c
 	ocamlfind ocamlopt -package ctypes,ctypes.foreign -linkpkg -o $@ $^
 
 clean:

@@ -103,7 +103,11 @@ let print ls =
     and
     print_ocaml_json ls =
         match ls with
-        | (a, b) :: tl -> begin Printf.printf begin getFormattedNameField a end begin getNameFieldContents a end; match_print b; print_ocaml_json tl; end
+        | (a, b) :: tl ->   begin
+                                Printf.printf begin getFormattedNameField a end begin getNameFieldContents a end;
+                                match_print b;
+                                print_ocaml_json tl;
+                            end
         | [] -> ()
     in let _ = print_ocaml_json ls in print_string "\n}\n"
 
@@ -125,7 +129,8 @@ let build_json ls =
         | Null -> cJSON_CreateNull ()
     and build json_obj ls =
         match ls with
-        | (a, b) :: tl -> cJSON_AddItemToObject json_obj begin getNameFieldContents a end begin match_return b ls end; build json_obj tl
+        | (a, b) :: tl ->   cJSON_AddItemToObject json_obj begin getNameFieldContents a end begin match_return b ls end;
+                            build json_obj tl
         | [] -> ()
     in let _ = build base_cJSON ls in base_cJSON
 

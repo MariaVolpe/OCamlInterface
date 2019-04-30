@@ -7,8 +7,8 @@ type name = ObjKey of string | ArrKey of int
 type value = Float of float
             | String of string
             | Bool of int (* in cJSON, a bool is represented by an int *)
-            | Child of json
-            | Array of json (* like a child but with integer keys *)
+            | Child of json (* object child *)
+            | Array of json (* array child *)
             | Null
 and node = name * value
 and json = node list
@@ -84,7 +84,7 @@ let getFormattedNameField key =
     | ArrKey i -> begin format_of_string "%s" end
     | ObjKey s -> begin format_of_string "\"%s\": " end
 
-let getNameFieldContents key =
+let getRawNameFieldContents key =
     match key with
     | ArrKey i -> ""
     | ObjKey s -> s
@@ -136,10 +136,10 @@ let build_json ls =
 
 let output_to_file cJSON_obj =
     let file = "results.json" in
-    let str_rep = cJSON_Print cJSON_obj in
+    let cJSON_string_rep = cJSON_Print cJSON_obj in
     let oc = open_out file in
     let output () =
-        fprintf oc "%s\n" str_rep;
+        fprintf oc "%s\n" cJSON_string_rep;
         close_out oc
     in output ()
 

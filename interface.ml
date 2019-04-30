@@ -97,13 +97,16 @@ let get_raw_name_field_contents key =
     | ObjKey s -> s
 
 let rec print_indents n =
-    if n > 0 then begin print_string "    "; print_indents (n-1) end
+    if n > 0 then   begin
+                        print_string "    ";
+                        print_indents (n-1)
+                    end
 
 let print ls =
     let _ = print_string "\n\n{\n" in
     let rec match_print name item num_indents =
         let _ = print_indents num_indents in 
-        Printf.printf begin get_formatted_name_field name end begin get_raw_name_field_contents name end;
+        let _ = Printf.printf begin get_formatted_name_field name end begin get_raw_name_field_contents name end in
         match item with
         | Float f -> Printf.printf "%f,\n" f
         | String s -> Printf.printf "\"%s\",\n" s

@@ -3,7 +3,7 @@ open Foreign
 open Printf
 
 (* ocaml variant equivalent to cJSON c struct *)
-type name = string
+type name = ObjKey of string | ArrKey of int
 type value = Float of float
             | String of string
             | Bool of int (* in cJSON, a bool is represented by an int *)
@@ -64,23 +64,34 @@ let cJSON_Parse = foreign "cJSON_Parse" (string @-> returning (ptr cJSON))
 
 (* -------------- OCaml Functionality -------------- *)
 
-let sample_json = [ ("first_field", String "hello_world_1");
-                    ("second_field", String "hello_world_2");
-                    ("second_field", String "hello_world_2");
-                    ("third_field", Float 0.0000);
-                    ("fourth_field", Bool 0);
-                    ("fifth_field", Bool 1);
-                    ("sixth_field", Child [("child_field", Float 1.1111)]);
-                    ("seventh_field", Array [("0", Float 2.2222); ("1", String "test")]); 
-                    ("eigth_field", Child [("child_field", Float 3.33333);
-                                            ("child_field2", Child [
-                                                                ("child_child_field", Bool 1);
-                                                                ("child_child_next", Bool 2)]
+let sample_json = [ (ObjKey "first_field", String "hello_world_1");
+                    (ObjKey "second_field", String "hello_world_2");
+                    (ObjKey "second_field", String "hello_world_2");
+                    (ObjKey "third_field", Float 0.0000);
+                    (ObjKey "fourth_field", Bool 0);
+                    (ObjKey "fifth_field", Bool 1);
+                    (ObjKey "sixth_field", Child [(ObjKey "child_field", Float 1.1111)]);
+                    (ObjKey "seventh_field", Array [(ArrKey 0, Float 2.2222); (ArrKey 1, String "test")]); 
+                    (ObjKey "eigth_field", Child [(ObjKey "child_field", Float 3.33333);
+                                            (ObjKey "child_field2", Child [
+                                                                (ObjKey "child_child_field", Bool 1);
+                                                                (ObjKey "child_child_next", Bool 2)]
                                             )]);                                    
                     ]
-let notInt i = 
-    try ignore (int_of_string i); false
-    with _ -> true
+let notInt i =
+    match i with
+    | ArrKey _ -> false
+    | ObjKey _-> true
+
+let getFormattedNameField key =
+    match key with
+    | ArrKey i -> begin format_of_string "%s" end
+    | ObjKey s -> begin format_of_string "\"%s\": " end
+
+let getNameFieldContents key =
+    match key with
+    | ArrKey i -> ""
+    | ObjKey s -> s
 
 let print ls =
     let _ = print_string "\n\n{\n" in
@@ -96,10 +107,7 @@ let print ls =
     and
     print_ocaml_json ls =
         match ls with
-        | (a, b) :: tl -> if begin notInt a end then
-                            begin Printf.printf "\"%s\": " a; match_print b; print_ocaml_json tl; end
-                            else
-                            begin print_string ""; match_print b; print_ocaml_json tl; end
+        | (a, b) :: tl -> begin Printf.printf begin getFormattedNameField a end begin getNameFieldContents a end; match_print b; print_ocaml_json tl; end
         | [] -> ()
     in let _ = print_ocaml_json ls in print_string "\n}\n"
 
@@ -121,7 +129,7 @@ let build_json ls =
         | Null -> cJSON_CreateNull ()
     and build json_obj ls =
         match ls with
-        | (a, b) :: tl -> cJSON_AddItemToObject json_obj a begin match_return b ls end; build json_obj tl
+        | (a, b) :: tl -> cJSON_AddItemToObject json_obj begin getNameFieldContents a end begin match_return b ls end; build json_obj tl
         | [] -> ()
     in let _ = build base_cJSON ls in base_cJSON
 

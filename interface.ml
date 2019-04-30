@@ -1,22 +1,21 @@
 open Ctypes
-open PosixTypes
 open Foreign
-
-let read_file = foreign "read_file" (string @-> returning string) ;;
+open Printf
 
 (* ocaml variant equivalent to cJSON c struct *)
-type name = string
+type name = ObjKey of string | ArrKey of int
 type value = Float of float
             | String of string
-            | Bool of bool
+            | Bool of int (* in cJSON, a bool is represented by an int *)
             | Child of json
+            | Array of json (* like a child but with integer keys *)
             | Null
 and node = name * value
 and json = node list
 
-(* cJSON *)
+(* -------------- cJSON interface -------------- *)
 
-(* TYPE DECLARATIONS *)
+(* ------ TYPE DECLARATIONS ------ *)
 
 (* typedef int cJSON_bool; *)
 let cJSON_bool = int
@@ -33,72 +32,120 @@ let valueint = field cJSON "valueint" int
 let valuedouble = field cJSON "valuedouble" double
 let name = field cJSON "string" string
 
+(* ------ cJSON FUNCTIONS ------ *)
 
-let print_json ls =
-    []
+(* CJSON_PUBLIC(cJSON * ) cJSON_CreateNumber(double num); *)
+let cJSON_CreateNumber = foreign "cJSON_CreateNumber" (double @-> returning (ptr cJSON))
 
-(* failing b/c of getf *)
-let get field =
-    (* getf cJSON_blurb field *)
-    false
+(* CJSON_PUBLIC(cJSON * ) cJSON_CreateString(const char *string); *)
+let cJSON_CreateString = foreign "cJSON_CreateString" (string @-> returning (ptr cJSON))
 
-(* TODO wrap C *)
-let ifNull arg =
-    false
+(* CJSON_PUBLIC(cJSON * ) cJSON_CreateBool(cJSON_bool boolean); *)
+let cJSON_CreateBool = foreign "cJSON_CreateBool" (cJSON_bool @-> returning (ptr cJSON))
 
-let getValueTuple current =
-    let c_name = getf current name in
-    let c_type = begin getf current json_type end in
-    match c_type with
-    | 0 -> ("c_name", Bool false)
-    | 1 -> ("c_name", Bool true)
-    | 2 -> ("c_name", Null)
-    | 3 -> ("c_name", Float begin getf current valuedouble end)
-    | 4 -> ("c_name", String begin getf current valuestring end)
-    (* | 5 -> (c_name, Child "placeholder") *)
-    (* | 6 -> (c_name, Child begin getf current next end) *)
-    (* | 7 -> (c_name, Child "placeholder")
-    | _ -> () TODO: raise exception, invalid json *)
+(* CJSON_PUBLIC(cJSON * ) cJSON_CreateNull(void); *)
+let cJSON_CreateNull = foreign "cJSON_CreateNull" (void @-> returning (ptr cJSON))
 
-let cJSONtoJSON cJSON_blurb =
-    let rec convert current =
-        if ifNull current
-            then []
-        else
-            [begin getValueTuple current end]
-            (* @ begin convert begin getf current next end end *)
-    in convert cJSON_blurb
+(* CJSON_PUBLIC(cJSON * ) cJSON_CreateObject(void); *)
+let cJSON_CreateObject = foreign "cJSON_CreateObject" (void @-> returning (ptr cJSON))
 
-(* let run_test_files () =
-    let files = [ "json/shallow.json"; "json/children.json"; "json/deep-children.json"; "json/array.json" ] in
-    let rec run ls =
-        match ls with
-        | hd :: tl -> (cJSONtoJSON hd) :: run tl
-        | [] -> []
-    in let ls = run files in print_json ls *)
+(* CJSON_PUBLIC(cJSON * ) cJSON_CreateArray(void); *)
+let cJSON_CreateArray = foreign "cJSON_CreateArray" (void @-> returning (ptr cJSON))
 
-(* shorthand to allocate pointers for a given type *)
-let to_str_ptr str = allocate string str;;
-let to_int_ptr i = allocate int i;;
-let to_double_ptr dbl = allocate double dbl;;
+(* CJSON_PUBLIC(void) cJSON_AddItemToObject(cJSON *object, const char *string, cJSON *item); *)
+let cJSON_AddItemToObject = foreign "cJSON_AddItemToObject" (ptr cJSON @-> string @-> ptr cJSON @-> returning void)
 
-(* JSON FUNCTIONS *)
+(* CJSON_PUBLIC(char * ) cJSON_Print(const cJSON *item); *)
+let cJSON_Print = foreign "cJSON_Print" (ptr cJSON @-> returning string)
 
 (* CJSON_PUBLIC(cJSON * ) cJSON_Parse(const char *value); *)
-let cJSON_Parse = foreign "cJSON_Parse" (string @-> returning (ptr cJSON)) ;;
+let cJSON_Parse = foreign "cJSON_Parse" (string @-> returning (ptr cJSON))
 
-(* CJSON_PUBLIC(cJSON_bool) cJSON_IsTrue(const cJSON * const item); *)
-let cJSON_IsTrue = foreign "cJSON_IsTrue" (ptr cJSON @-> returning cJSON_bool) ;;
 
-(* small, temporary run test *)
+(* -------------- OCaml Functionality -------------- *)
+
+let sample_json = [ (ObjKey "first_field", String "hello_world_1");
+                    (ObjKey "second_field", String "hello_world_2");
+                    (ObjKey "second_field", String "hello_world_2");
+                    (ObjKey "third_field", Float 0.0000);
+                    (ObjKey "fourth_field", Bool 0);
+                    (ObjKey "fifth_field", Bool 1);
+                    (ObjKey "sixth_field", Child [(ObjKey "child_field", Float 1.1111)]);
+                    (ObjKey "seventh_field", Array [(ArrKey 0, Float 2.2222); (ArrKey 1, String "test")]); 
+                    (ObjKey "eigth_field", Child [(ObjKey "child_field", Float 3.33333);
+                                            (ObjKey "child_field2", Child [
+                                                                (ObjKey "child_child_field", Bool 1);
+                                                                (ObjKey "child_child_next", Bool 2)]
+                                            )]);                                    
+                    ]
+
+let getFormattedNameField key =
+    match key with
+    | ArrKey i -> begin format_of_string "%s" end
+    | ObjKey s -> begin format_of_string "\"%s\": " end
+
+let getNameFieldContents key =
+    match key with
+    | ArrKey i -> ""
+    | ObjKey s -> s
+
+let print ls =
+    let _ = print_string "\n\n{\n" in
+    let rec match_print item =
+    match item with
+    | Float f -> Printf.printf "%f,\n" f
+    | String s -> Printf.printf "\"%s\",\n" s
+    | Bool b -> if b = 1 then Printf.printf "%s,\n" "true"
+                else Printf.printf "%s,\n" "false"
+    | Child c -> print_string "{\n"; print_ocaml_json c; print_string "}";
+    | Array a -> print_string "[\n"; print_ocaml_json a; print_string "]";
+    | Null -> print_string "null,"
+    and
+    print_ocaml_json ls =
+        match ls with
+        | (a, b) :: tl ->   begin
+                                Printf.printf begin getFormattedNameField a end begin getNameFieldContents a end;
+                                match_print b;
+                                print_ocaml_json tl;
+                            end
+        | [] -> ()
+    in let _ = print_ocaml_json ls in print_string "\n}\n"
+
+let build_json ls = 
+    let base_cJSON = cJSON_CreateObject () in
+    let rec match_return item ls =
+        match item with
+        | Float f -> cJSON_CreateNumber f
+        | String s -> cJSON_CreateString s
+        | Bool b -> cJSON_CreateBool b
+        | Child c -> let new_obj = cJSON_CreateObject () in
+                let _ =
+                    build new_obj c
+                in new_obj
+        | Array a -> let new_arr = cJSON_CreateArray () in
+                let _ =
+                    build new_arr a
+                in new_arr
+        | Null -> cJSON_CreateNull ()
+    and build json_obj ls =
+        match ls with
+        | (a, b) :: tl ->   cJSON_AddItemToObject json_obj begin getNameFieldContents a end begin match_return b ls end;
+                            build json_obj tl
+        | [] -> ()
+    in let _ = build base_cJSON ls in base_cJSON
+
+let output_to_file cJSON_obj =
+    let file = "results.json" in
+    let str_rep = cJSON_Print cJSON_obj in
+    let oc = open_out file in
+    let output () =
+        fprintf oc "%s\n" str_rep;
+        close_out oc
+    in output ()
+
+(* -------------- run -------------- *)
+
 let () =
-    Printf.printf "%s \n" (read_file "json/shallow.json")
-    let str = read_file "json/shallow.json"
-    let ptr_cJSON = cJSON_Parse str
-    let new_cJSON = !@ptr_cJSON
-    (* let _ = 
-        match ptr_cJSON with
-        | cJSON -> print_string "cJSON"
-        | _ -> print_string "not"
-     *)
-    (* let _ = run_test_files () *)
+    let json_results = build_json sample_json in
+    let _ = output_to_file json_results in
+    let _ = print sample_json in ()

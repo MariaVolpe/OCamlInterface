@@ -78,10 +78,6 @@ let sample_json = [ (ObjKey "first_field", String "hello_world_1");
                                                                 (ObjKey "child_child_next", Bool 2)]
                                             )]);                                    
                     ]
-let notInt i =
-    match i with
-    | ArrKey _ -> false
-    | ObjKey _-> true
 
 let getFormattedNameField key =
     match key with

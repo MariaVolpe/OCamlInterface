@@ -1,0 +1,19 @@
+{
+	"first_field":	"hello_world_1",
+	"second_field":	"hello_world_2",
+	"second_field":	"hello_world_2",
+	"third_field":	0,
+	"fourth_field":	false,
+	"fifth_field":	true,
+	"sixth_field":	{
+		"child_field":	1.1111
+	},
+	"seventh_field":	[2.2222, "test"],
+	"eigth_field":	{
+		"child_field":	3.33333,
+		"child_field2":	{
+			"child_child_field":	true,
+			"child_child_next":	true
+		}
+	}
+}

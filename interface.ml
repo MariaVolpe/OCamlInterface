@@ -2,14 +2,15 @@ open Ctypes
 open Foreign
 open Printf
 
-(* ocaml variant equivalent to cJSON c struct *)
+(* OCaml variant equivalent to cJSON c struct *)
 type name = ObjKey of string | ArrKey of int
-type value = Float of float
-            | String of string
-            | Bool of int (* in cJSON, a bool is represented by an int *)
-            | Child of json (* object child *)
-            | Array of json (* array child *)
-            | Null
+type value =
+    Float of float
+    | String of string
+    | Bool of int (* in cJSON bools are represented by ints 0 and 1 *)
+    | Child of json (* object child *)
+    | Array of json (* array child *)
+    | Null
 and node = name * value
 and json = node list
 
@@ -64,71 +65,77 @@ let cJSON_Parse = foreign "cJSON_Parse" (string @-> returning (ptr cJSON))
 
 (* -------------- OCaml Functionality -------------- *)
 
-let sample_json = [ (ObjKey "first_field", String "this is a string");
-                    (ObjKey "second_field", String "this is also a string");
-                    (ObjKey "second_field", String "we can name these whatever we like!");
-                    (ObjKey "third_field", Float 0.0000);
-                    (ObjKey "fourth_field", Bool 0);
-                    (ObjKey "fifth_field", Bool 1);
-                    (ObjKey "sixth_field", Child [(ObjKey "child_field", Float 1.1111)]);
-                    (ObjKey "seventh_field", Array [
-                                                        (ArrKey 0, Float 2.2222);
-                                                        (ArrKey 1, String "array string field");
-                                                        (ArrKey 2, Child [
-                                                                            (ObjKey "array_child", String "this string is in an object, in an array!")
-                                                                        ]
-                                                        )
-                                                    ]); 
-                    (ObjKey "eigth_field", Child [(ObjKey "child_field", Float 3.33333);
-                                            (ObjKey "nested_children", Child [
-                                                                                (ObjKey "child_child_field", Bool 1);
-                                                                                (ObjKey "child_child_next", Bool 2)]
-                                            )]);                                    
-                    ]
+let sample_json = [
+    (ObjKey "first_field", String "this is a string");
+    (ObjKey "second_field", String "we can name these whatever we like!");
+    (ObjKey "third_field", Float 0.0000);
+    (ObjKey "fourth_field", Bool 0);
+    (ObjKey "fifth_field", Bool 1);
+    (ObjKey "sixth_field", Child [(ObjKey "child_field", Float 1.1111)]);
+    (ObjKey "seventh_field", Array [
+        (ArrKey 0, Float 2.2222);
+        (ArrKey 1, String "array string field");
+        (ArrKey 2, Child [
+            (ObjKey "array_child", String "this string is in an object, in an array!")
+        ]
+        )
+    ]); 
+    (ObjKey "eigth_field", Child [(ObjKey "child_field", Float 3.33333);
+        (ObjKey "nested_children", Child [
+            (ObjKey "child_child_field", Bool 1);
+            (ObjKey "child_child_next", Bool 2)]
+        )]);                                    
+]
 
-let get_formatted_name_field field =
-    match field with
+let get_format_of_name_field name =
+    match name with
     | ArrKey i -> begin format_of_string "%s" end
     | ObjKey s -> begin format_of_string "\"%s\": " end
 
-let get_raw_name_field_contents field =
-    match field with
-    | ArrKey i -> ""
+(* array keys are not printed, understood to be zero or a positive integer *)
+let get_raw_name_field_contents name =
+    match name with
+    | ArrKey _ -> ""
     | ObjKey s -> s
 
 let rec print_indents n =
-    if n > 0 then   begin
-                        print_string "    ";
-                        print_indents (n-1)
-                    end
+    if n > 0 then
+        begin
+            print_string "    ";
+            print_indents (n-1)
+        end
 
 let print json_ls =
-    let _ = print_string "\n\n{\n" in
+    print_string "\n\n{\n";
     let rec match_print name item num_indents =
-        let _ = print_indents num_indents in 
-        let _ = Printf.printf begin get_formatted_name_field name end begin get_raw_name_field_contents name end in
+        print_indents num_indents;
+        Printf.printf
+            (get_format_of_name_field name) (get_raw_name_field_contents name);
         match item with
         | Float f -> Printf.printf "%f,\n" f
         | String s -> Printf.printf "\"%s\",\n" s
-        | Bool b -> if b = 1 then Printf.printf "%s,\n" "true"
-                    else Printf.printf "%s,\n" "false"
-        | Child c ->    print_string "{\n";
-                        print_ocaml_json (num_indents+1) c;
-                        print_indents num_indents;
-                        print_string "}\n";
-        | Array a ->    print_string "[\n";
-                        print_ocaml_json (num_indents+1) a;
-                        print_indents num_indents;
-                        print_string "]\n";
+        | Bool b ->
+            if b = 1 then Printf.printf "%s,\n" "true"
+            else Printf.printf "%s,\n" "false"
+        | Child c ->  
+            print_string "{\n";
+            print_ocaml_json (num_indents+1) c;
+            print_indents num_indents;
+            print_string "}\n";
+        | Array a ->
+            print_string "[\n";
+            print_ocaml_json (num_indents+1) a;
+            print_indents num_indents;
+            print_string "]\n";
         | Null -> print_string "null,"
     and print_ocaml_json num_indents json_ls =
         match json_ls with
-        | (a, b) :: tl ->   begin
-                                match_print a b num_indents;
-                                print_ocaml_json num_indents tl;
-                            end
+        | (a, b) :: tl -> 
+            match_print a b num_indents;
+            print_ocaml_json num_indents tl
         | [] -> ()
-    in let _ = print_ocaml_json 1 json_ls in print_string "\n}\n"
+    in print_ocaml_json 1 json_ls;
+    print_string "\n}\n"
 
 let build_json ls = 
     let base_cJSON = cJSON_CreateObject () in
@@ -137,21 +144,24 @@ let build_json ls =
         | Float f -> cJSON_CreateNumber f
         | String s -> cJSON_CreateString s
         | Bool b -> cJSON_CreateBool b
-        | Child c -> let new_obj = cJSON_CreateObject () in
-                let _ =
-                    build new_obj c
-                in new_obj
-        | Array a -> let new_arr = cJSON_CreateArray () in
-                let _ =
-                    build new_arr a
-                in new_arr
+        | Child c ->
+            let new_obj = cJSON_CreateObject () in
+            build new_obj c;
+            new_obj
+        | Array a ->
+            let new_arr = cJSON_CreateArray () in
+            build new_arr a;
+            new_arr
         | Null -> cJSON_CreateNull ()
     and build json_obj ls =
         match ls with
-        | (a, b) :: tl ->   cJSON_AddItemToObject json_obj begin get_raw_name_field_contents a end begin match_return b ls end;
-                            build json_obj tl
+        | (a, b) :: tl ->   
+            cJSON_AddItemToObject json_obj 
+                (get_raw_name_field_contents a) (match_return b ls);
+            build json_obj tl
         | [] -> ()
-    in let _ = build base_cJSON ls in base_cJSON
+    in build base_cJSON ls;
+    base_cJSON
 
 let output_to_file cJSON_obj =
     let file = "results.json" in
@@ -160,11 +170,12 @@ let output_to_file cJSON_obj =
     let output () =
         fprintf oc "%s\n" cJSON_string_rep;
         close_out oc
-    in output ()
+    in
+    output ()
 
 (* -------------- run -------------- *)
 
 let () =
     let json_results = build_json sample_json in
-    let _ = output_to_file json_results in
-    let _ = print sample_json in ()
+    output_to_file json_results;
+    print sample_json

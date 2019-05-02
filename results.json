@@ -1,6 +1,5 @@
 {
 	"first_field":	"this is a string",
-	"second_field":	"this is also a string",
 	"second_field":	"we can name these whatever we like!",
 	"third_field":	0,
 	"fourth_field":	false,

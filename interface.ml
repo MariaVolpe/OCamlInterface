@@ -83,7 +83,7 @@ let sample_json = [
     (ObjKey "eigth_field", Child [(ObjKey "child_field", Float 3.33333);
         (ObjKey "nested_children", Child [
             (ObjKey "child_child_field", Bool 1);
-            (ObjKey "child_child_next", Bool 2)]
+            (ObjKey "child_child_next", Null)]
         )]);                                    
 ]
 
@@ -127,7 +127,7 @@ let print json_ls =
             print_ocaml_json (num_indents+1) a;
             print_indents num_indents;
             print_string "]\n";
-        | Null -> print_string "null,"
+        | Null -> print_string "null,\n"
     and print_ocaml_json num_indents json_ls =
         match json_ls with
         | (a, b) :: tl -> 

@@ -14,7 +14,7 @@
 		"child_field":	3.33333,
 		"nested_children":	{
 			"child_child_field":	true,
-			"child_child_next":	true
+			"child_child_next":	null
 		}
 	}
 }

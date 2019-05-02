@@ -5,12 +5,13 @@ A program that defines an OCaml JSON type, and interfaces with [cJSON](https://g
 ## JSON Implementations at a Glance
 ```
 type name = ObjKey of string | ArrKey of int
-type value = Float of float
-            | String of string
-            | Bool of int (* in cJSON, a bool is represented by an int *)
-            | Child of json (* object child *)
-            | Array of json (* array child *)
-            | Null
+type value =
+    Float of float
+    | String of string
+    | Bool of int
+    | Child of json
+    | Array of json
+    | Null
 and node = name * value
 and json = node list
 ```

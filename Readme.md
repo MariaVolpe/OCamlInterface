@@ -8,7 +8,7 @@ type name = ObjKey of string | ArrKey of int
 type value =
     Float of float
     | String of string
-    | Bool of int
+    | Bool of bool
     | Child of json
     | Array of json
     | Null

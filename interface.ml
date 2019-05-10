@@ -7,7 +7,7 @@ type name = ObjKey of string | ArrKey of int
 type value =
     Float of float
     | String of string
-    | Bool of int (* in cJSON bools are represented by ints 0 and 1 *)
+    | Bool of bool
     | Child of json (* object child *)
     | Array of json (* array child *)
     | Null
@@ -69,8 +69,8 @@ let sample_json = [
     (ObjKey "first_field", String "this is a string");
     (ObjKey "second_field", String "we can name these whatever we like!");
     (ObjKey "third_field", Float 0.0000);
-    (ObjKey "fourth_field", Bool 0);
-    (ObjKey "fifth_field", Bool 1);
+    (ObjKey "fourth_field", Bool false);
+    (ObjKey "fifth_field", Bool true);
     (ObjKey "sixth_field", Child [(ObjKey "child_field", Float 1.1111)]);
     (ObjKey "seventh_field", Array [
         (ArrKey 0, Float 2.2222);
@@ -82,7 +82,7 @@ let sample_json = [
     ]); 
     (ObjKey "eigth_field", Child [(ObjKey "child_field", Float 3.33333);
         (ObjKey "nested_children", Child [
-            (ObjKey "child_child_field", Bool 1);
+            (ObjKey "child_child_field", Bool true);
             (ObjKey "child_child_next", Null)]
         )]);                                    
 ]
@@ -115,7 +115,7 @@ let print json_ls =
         | Float f -> Printf.printf "%f,\n" f
         | String s -> Printf.printf "\"%s\",\n" s
         | Bool b ->
-            if b = 1 then Printf.printf "%s,\n" "true"
+            if b = true then Printf.printf "%s,\n" "true"
             else Printf.printf "%s,\n" "false"
         | Child c ->  
             print_string "{\n";
@@ -143,7 +143,11 @@ let build_json ls =
         match item with
         | Float f -> cJSON_CreateNumber f
         | String s -> cJSON_CreateString s
-        | Bool b -> cJSON_CreateBool b
+        | Bool b ->
+            begin
+                if b = true then cJSON_CreateBool 1
+                else cJSON_CreateBool 0
+            end
         | Child c ->
             let new_obj = cJSON_CreateObject () in
             build new_obj c;
